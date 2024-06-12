@@ -1,24 +1,50 @@
-//
-//  ContentView.swift
-//  FastSwiftBasic
-//
-//  Created by 주영정 on 4/30/24.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var viewModel = TodoViewModel()
+    @State private var newItemTitle: String = ""
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationView {
+            VStack {
+                HStack {
+                    TextField("New Todo", text: $newItemTitle)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Button(action: {
+                        guard !newItemTitle.isEmpty else { return }
+                        viewModel.addItem(title: newItemTitle)
+                        newItemTitle = ""
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                    .padding(.leading, 10)
+                }
+                .padding()
+
+                List {
+                    ForEach(viewModel.items) { item in
+                        HStack {
+                            Text(item.title)
+                                .strikethrough(item.isCompleted, color: .gray)
+                            Spacer()
+                            Button(action: {
+                                viewModel.toggleCompletion(item: item)
+                            }) {
+                                Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(item.isCompleted ? .green : .gray)
+                            }
+                        }
+                        .padding(.vertical, 5)
+                    }
+                }
+            }
+            .navigationTitle("Todo List Project")
         }
-        .padding()
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
